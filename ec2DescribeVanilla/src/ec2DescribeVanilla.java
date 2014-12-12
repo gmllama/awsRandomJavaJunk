@@ -1,4 +1,3 @@
-import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -19,10 +18,8 @@ import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.AccessControlList;
-import com.amazonaws.services.s3.model.CanonicalGrantee;
 import com.amazonaws.services.s3.model.EmailAddressGrantee;
-import com.amazonaws.services.s3.model.Grantee;
-import com.amazonaws.services.s3.model.GroupGrantee;
+import com.amazonaws.services.s3.model.Grant;
 import com.amazonaws.services.s3.model.Owner;
 import com.amazonaws.services.s3.model.Permission;
 
@@ -105,17 +102,24 @@ public class ec2DescribeVanilla {
 
 			AccessControlList acl = new AccessControlList();
 			acl.grantPermission(new EmailAddressGrantee(acctEmail), Permission.Read);
-			acl.grantPermission(new EmailAddressGrantee(acctEmail), Permission.ReadAcp);
 			Owner owner = new Owner();
 			owner.setId("b6932e976fb769ddf052252cf6cca52434f23555e2866337400e7f0e0c63ee98");
 			owner.setDisplayName("daniep@amazon.com");
 			acl.setOwner(owner);
 
 			s3client.setObjectAcl(bucketName, keyName, acl);
-				
-			System.out.println("Grants: " + acl.getGrants());
-			System.out.println("getObjectAcl: " + s3client.getObjectAcl(bucketName, keyName));
-			System.out.println("getObjectAcl().getGrants: " + s3client.getObjectAcl(bucketName, keyName).getGrants().toString());
+			
+			
+			for (Grant grant2 : acl.getGrants()) {
+				System.out.println("Grantee: " + grant2.getGrantee());
+			}
+			for (Grant grant : s3client.getObjectAcl(bucketName, keyName).getGrants()) {
+			    System.out.println("Canonical: " + grant.getGrantee().getIdentifier());
+			}
+			//Collection<Grant> grantCollection = new ArrayList<Grant>();
+			//System.out.println("Grants: " + acl.getGrants());
+			//System.out.println("getObjectAcl: " + s3client.getObjectAcl(bucketName, keyName));
+			//System.out.println("getObjectAcl().getGrants: " + s3client.getObjectAcl(bucketName, keyName).getGrants().toString());
 		} 
 		catch (AmazonServiceException ase) {
             System.out.println("Caught Exception: " + ase.getMessage());
